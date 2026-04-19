@@ -91,7 +91,7 @@ target/
 .pytest_cache/
 
 # Data and models
-data/*/*
+data/*
 models/*
 !.gitkeep
 
@@ -100,4 +100,3 @@ dev
 
 # Enviroment Variables
 set_env_var.sh
-
