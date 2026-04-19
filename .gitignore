@@ -97,3 +97,7 @@ models/*
 
 # Dev
 dev
+
+# Enviroment Variables
+set_env_var.sh
+
