@@ -10,6 +10,8 @@ certifi==2026.2.25
     # via requests
 charset-normalizer==3.4.7
     # via requests
+colorama==0.4.6 ; sys_platform == 'win32'
+    # via tqdm
 flatbuffers==25.12.19
     # via tensorflow
 gast==0.7.0
@@ -24,6 +26,10 @@ h5py==3.14.0
     #   tensorflow
 idna==3.11
     # via requests
+kagglehub==1.0.0
+    # via multiclass
+kagglesdk==0.1.19
+    # via kagglehub
 keras==3.14.0
     # via tensorflow
 libclang==18.1.1
@@ -51,19 +57,27 @@ optree==0.19.0
     # via keras
 packaging==26.1
     # via
+    #   kagglehub
     #   keras
     #   tensorflow
     #   wheel
 pandas==3.0.2
     # via multiclass
 protobuf==7.34.1
-    # via tensorflow
+    # via
+    #   kagglesdk
+    #   tensorflow
 pygments==2.20.0
     # via rich
 python-dateutil==2.9.0.post0
     # via pandas
+pyyaml==6.0.3
+    # via kagglehub
 requests==2.33.1
-    # via tensorflow
+    # via
+    #   kagglehub
+    #   kagglesdk
+    #   tensorflow
 rich==15.0.0
     # via keras
 setuptools==82.0.1
@@ -78,6 +92,8 @@ tensorflow==2.21.0
     # via multiclass
 termcolor==3.3.0
     # via tensorflow
+tqdm==4.67.3
+    # via kagglehub
 typing-extensions==4.15.0
     # via
     #   grpcio
