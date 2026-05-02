@@ -35,5 +35,8 @@ def download_dataset():
 if __name__ == "__main__":
     setup_logger()
     logger.info("Starting dataset download...")
-    download_dataset()
-    logger.success("Dataset download is completed.")
+    try:
+        download_dataset()
+        logger.success("Dataset download is completed.")
+    except Exception as error:
+        logger.error(f"Error occurred while downloading dataset: {error}")
