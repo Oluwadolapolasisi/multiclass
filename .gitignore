@@ -95,8 +95,9 @@ data/*
 models/*
 !.gitkeep
 
-# Dev
+# Directories to ignore
 dev
+logs
 
-# Enviroment Variables
+# Environment Variables
 set_env_var.sh
