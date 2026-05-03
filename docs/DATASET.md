@@ -140,7 +140,7 @@ The purpose of this overlap is continuity. If a person transitions from walking 
 | **Total raw values** | **768** | Combined per window |
 
 Each window is then processed through a signal pipeline — noise filtering, gravity separation, and statistical feature extraction — to produce the final **561-feature vector** used for model training.
-The details of this is cover in [Feature README](FEATURE.md).
+The details of this are covered in [Feature README](FEATURE.md).
 
 ---
 
