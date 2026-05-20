@@ -98,6 +98,7 @@ models/*
 # Directories to ignore
 dev
 logs
+saved_models/
 
 # Environment Variables
 set_env_var.sh
