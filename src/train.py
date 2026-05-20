@@ -2,27 +2,35 @@
 train.py
 
 Training script for the Human Activity Recognition multiclass classifier.
-Loads the dataset, builds a FeedForwardNetwork, trains with TensorBoard
-logging, and evaluates on the test set.
+Supports both FeedForwardNetwork (ffn) and Conv1DNetwork (cnn) architectures.
+Loads the dataset, builds the selected model, trains with TensorBoard
+logging, computes evaluation metrics (confusion matrix, F1, precision,
+recall, AUC), and evaluates on the test set.
 
 Usage:
-    python train.py
-    python train.py --data_dir ./data --epochs 100 --batch_size 64
-    python train.py --evaluate_only --model_path saved_models/har_ffn
+    python train.py --model ffn --data_dir ./data --epochs 100
+    python train.py --model cnn --data_dir ./data --epochs 100
+    python train.py --evaluate_only --model ffn --model_path saved_models/har_ffn.keras
 
 TensorBoard:
     tensorboard --logdir logs/tensorboard
 
-Version: 1.0
-Date: 02-05-2026
+Version: 2.0
+Date: 20-05-2026
 """
 
 import argparse
 import os
 import tensorflow as tf
 from logger_setup import setup_logger, logger
-from dataset import load_dataset, NUM_CLASSES
-from models import build_feedforward_network, FeedForwardNetwork
+from dataset import load_dataset, NUM_CLASSES, ACTIVITY_LABELS
+from models import (
+    build_model,
+    FeedForwardNetwork,
+    Conv1DNetwork,
+    MODEL_REGISTRY,
+)
+from metrics import compute_all_metrics, log_metrics_to_tensorboard
 from utils import check_gpu, set_gpu, set_seed, get_callbacks
 
 
@@ -61,15 +69,18 @@ def train(args):
         f"Features: {num_features} | Classes: {NUM_CLASSES}"
     )
 
-    model = build_feedforward_network(
+    model = build_model(
+        model_type=args.model,
         num_features=num_features,
         num_classes=NUM_CLASSES,
         dropout_rate=args.dropout_rate,
         learning_rate=args.learning_rate,
     )
 
+    # Namespace TensorBoard logs by model type
+    tb_dir = os.path.join(args.tensorboard_dir, args.model)
     callbacks = get_callbacks(
-        log_dir=args.tensorboard_dir,
+        log_dir=tb_dir,
         patience=args.patience,
     )
 
@@ -89,7 +100,7 @@ def train(args):
     model.save(args.model_path)
     logger.success(f"Model saved to {args.model_path}")
 
-    # Evaluate on test set 
+    # Evaluate on test set + compute advanced metrics
     if os.path.isfile(test_path):
         logger.info("Evaluating on test set...")
         test_ds, test_info = load_dataset(
@@ -99,6 +110,15 @@ def train(args):
         logger.success(
             f"Test results — loss: {test_loss:.4f} | accuracy: {test_accuracy:.4f}"
         )
+
+        # Compute and save advanced metrics
+        metrics_dir = os.path.join("logs", "metrics", args.model)
+        metrics = compute_all_metrics(
+            model, test_ds,
+            class_names=ACTIVITY_LABELS,
+            output_dir=metrics_dir,
+        )
+        log_metrics_to_tensorboard(metrics, log_dir=tb_dir)
     else:
         logger.warning(f"Test file not found at {test_path} — skipping evaluation.")
 
@@ -119,7 +139,10 @@ def evaluate(args):
     model_path = _resolve_model_path(args.model_path)
     model = tf.keras.models.load_model(
         model_path,
-        custom_objects={"FeedForwardNetwork": FeedForwardNetwork},
+        custom_objects={
+            "FeedForwardNetwork": FeedForwardNetwork,
+            "Conv1DNetwork": Conv1DNetwork,
+        },
     )
 
     test_ds, test_info = load_dataset(
@@ -131,21 +154,38 @@ def evaluate(args):
         f"Test results — loss: {test_loss:.4f} | accuracy: {test_accuracy:.4f}"
     )
 
+    # Compute and save advanced metrics
+    metrics_dir = os.path.join("logs", "metrics", args.model)
+    metrics = compute_all_metrics(
+        model, test_ds,
+        class_names=ACTIVITY_LABELS,
+        output_dir=metrics_dir,
+    )
+
+    # Log to TensorBoard
+    tb_dir = os.path.join(args.tensorboard_dir, args.model)
+    log_metrics_to_tensorboard(metrics, log_dir=tb_dir)
+
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Train a Feed-Forward Network for Human Activity Recognition."
+        description="Train or evaluate a HAR model (FFN or CNN)."
     )
+
+    # Model selection
+    parser.add_argument("--model", default="ffn", choices=list(MODEL_REGISTRY.keys()),
+                        help="Model architecture to use: 'ffn' or 'cnn' (default: ffn).")
 
     # Data
     parser.add_argument("--data_dir", default="./data",
                         help="Directory containing the CSV data files.")
 
-    # Model
+    # Model saving/loading
     parser.add_argument("--dropout_rate", type=float, default=0.3,
                         help="Dropout rate after each hidden layer (default: 0.3).")
-    parser.add_argument("--model_path", default="saved_models/har_ffn.keras",
-                        help="Path to save/load the trained model (default: saved_models/har_ffn.keras).")
+    parser.add_argument("--model_path", default=None,
+                        help="Path to save/load the trained model. "
+                             "Defaults to saved_models/har_{model}.keras.")
 
     # Training
     parser.add_argument("--epochs", type=int, default=100,
@@ -168,10 +208,16 @@ def main():
                         help="Skip training; only evaluate a saved model on test set.")
 
     args = parser.parse_args()
+
+    # Default model_path based on model type if not explicitly provided
+    if args.model_path is None:
+        args.model_path = f"saved_models/har_{args.model}.keras"
+
     setup_logger()
 
+    model_name = "Feed-Forward Network" if args.model == "ffn" else "1D-CNN"
     logger.info("=" * 60)
-    logger.info("HAR Multiclass Classification — Feed-Forward Network")
+    logger.info(f"HAR Multiclass Classification — {model_name}")
     logger.info("=" * 60)
 
     if args.evaluate_only:

@@ -7,9 +7,10 @@ requires-python = ">=3.12"
 dependencies = [
     "kagglehub>=1.0.0",
     "loguru>=0.7.3",
+    "matplotlib>=3.10.9",
     "pandas>=3.0.2",
     "scikit-learn>=1.6.0",
     "setuptools>=70,<81",
     "tensorboard>=2.20.0",
-    "tensorflow>=2.21.0",
+    "tensorflow[and-cuda]>=2.21.0",
 ]
