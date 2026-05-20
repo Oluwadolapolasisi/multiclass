@@ -9,6 +9,7 @@ dependencies = [
     "loguru>=0.7.3",
     "pandas>=3.0.2",
     "scikit-learn>=1.6.0",
+    "setuptools>=70,<81",
     "tensorboard>=2.20.0",
     "tensorflow>=2.21.0",
 ]
