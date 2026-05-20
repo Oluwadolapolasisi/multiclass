@@ -22,8 +22,19 @@ import os
 import tensorflow as tf
 from logger_setup import setup_logger, logger
 from dataset import load_dataset, NUM_CLASSES
-from models import build_feedforward_network
+from models import build_feedforward_network, FeedForwardNetwork
 from utils import check_gpu, set_gpu, set_seed, get_callbacks
+
+
+def _resolve_model_path(path):
+    """Append .keras extension if missing and the .keras file exists."""
+    _, ext = os.path.splitext(path)
+    if ext not in (".keras", ".h5"):
+        keras_path = path + ".keras"
+        if os.path.isfile(keras_path):
+            logger.info(f"Resolved model path: {path} → {keras_path}")
+            return keras_path
+    return path
 
 
 def train(args):
@@ -105,7 +116,11 @@ def evaluate(args):
         return
 
     logger.info(f"Loading saved model from {args.model_path}")
-    model = tf.keras.models.load_model(args.model_path)
+    model_path = _resolve_model_path(args.model_path)
+    model = tf.keras.models.load_model(
+        model_path,
+        custom_objects={"FeedForwardNetwork": FeedForwardNetwork},
+    )
 
     test_ds, test_info = load_dataset(
         test_path, batch_size=args.batch_size, evaluate_mode=True
