@@ -27,6 +27,7 @@ Version: 1.0
 Date: 20-05-2026
 """
 
+import keras
 import tensorflow as tf
 from logger_setup import logger
 
@@ -34,8 +35,9 @@ from logger_setup import logger
 # TODO: CNN architecture
 
 
+@keras.saving.register_keras_serializable()
 class FeedForwardNetwork(tf.keras.Model):
-    """Fully-connected feedforward network for HAR classification.
+    """Fully-connected feedforward network for classification.
 
     Args:
         num_features: Number of input features (e.g. 561).
@@ -50,8 +52,9 @@ class FeedForwardNetwork(tf.keras.Model):
         num_classes,
         hidden_units=(512, 256, 128),
         dropout_rate=0.3,
+        **kwargs,
     ):
-        super().__init__()
+        super().__init__(**kwargs)
 
         # Store config for serialization (get_config)
         self._num_features = num_features
