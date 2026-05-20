@@ -64,7 +64,7 @@ def set_seed(seed=42):
     logger.info(f"Random seed set to {seed}")
 
 
-def get_callbacks(log_dir="logs/tensorboard", patience=10):
+def get_callbacks(log_dir="logs/tensorboard", patience=20):
     """Return a standard set of Keras callbacks for training.
 
     Args:
@@ -83,14 +83,14 @@ def get_callbacks(log_dir="logs/tensorboard", patience=10):
         ),
         tf.keras.callbacks.EarlyStopping(
             monitor="val_loss",
-            patience=patience,
+            patience= patience,
             restore_best_weights=True,
             verbose=1,
         ),
         tf.keras.callbacks.ReduceLROnPlateau(
             monitor="val_loss",
             factor=0.5,
-            patience=patience // 2,
+            patience= 10,
             min_lr=1e-6,
             verbose=1,
         ),
