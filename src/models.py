@@ -70,7 +70,7 @@ class FeedForwardNetwork(tf.keras.Model):
         self._hidden_units = tuple(hidden_units)
         self._dropout_rate = dropout_rate
 
-        # Build hidden blocks: Dense → BatchNorm → ReLU → Dropout
+        # Build hidden blocks
         self.hidden_blocks = []
         for units in hidden_units:
             block = [
@@ -196,7 +196,7 @@ class Conv1DNetwork(tf.keras.Model):
         self._num_classes = num_classes
         self._dropout_rate = dropout_rate
 
-        # Reshape flat features to (timesteps, 1) for Conv1D
+        # Reshape flat features to (561, 1) for Conv1D
         self.reshape = tf.keras.layers.Reshape((num_features, 1))
 
         # Conv block 1
