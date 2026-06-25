@@ -84,7 +84,7 @@ multiclass/
 1. **Clone the repo and create a virtual environment**
 
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/Oluwadolapolasisi/multiclass
    cd multiclass
    python -m venv .venv
    source .venv/bin/activate
